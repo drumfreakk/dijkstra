@@ -42,6 +42,7 @@ class Network:
 		self.cities[self.get_index(city)]["tentative"] = 0
 
 	def set_options_for_city(self, city):
+		self.road_order = []
 		for i in range(0, len(self.roads)):
 			if self.roads[i]["connects"][0] == city or self.roads[i]["connects"][1] == city:
 				self.road_order.append(self.roads[i])
@@ -52,16 +53,17 @@ class Network:
 			return
 
 		self.set_options_for_city(city)
-		print(city)
+#		print(city)
 		for road in self.road_order:
 			current = self.cities[self.get_index(city)]["tentative"]
 			for dest in road["connects"]:		# Get the destination city (ie. the one on the road that isnt the current one)
 				if dest != city:
 					destination_city = dest
 
-			print(road)
+#			print(road)
 
 			dest_index = self.get_index(destination_city)
+#			print(dest_index)
 			tentative = self.cities[dest_index]["tentative"]
 			
 			if tentative == -1 or current + road["distance"] < tentative:
@@ -70,9 +72,9 @@ class Network:
 		
 		self.cities[self.get_index(city)]["visited"] = True
 	
-		if city == 1:
-			print(self.road_order)
-			exit()
+#		if city == 1:
+#			print(self.road_order)
+#			exit()
 
 		check_order = self.road_order
 		for unvis in check_order:
@@ -94,7 +96,7 @@ class Network:
 #TODO add check to end
 
 n = Network()
-for i in range(0, 13):
+for i in range(0, 14):
 	n.create_city(i)
 #roads = [[0,1,1],[0,2,6],[0,3,7],[1,2,5],[1,3,2],[2,3,1]]
 roads = [[0,1,20],
@@ -129,12 +131,11 @@ roads = [[0,1,20],
 		 [11,12,63]]
 
 n.create_roads(roads)
-print(n)
 
 
 # Starting city is 0
-n.set_starting_city(0)
-n.check(0)
+n.set_starting_city(2)
+n.check(2)
 print(n)
 
 
