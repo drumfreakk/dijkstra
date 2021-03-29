@@ -19,6 +19,8 @@ class Network:
 
 		self.road_order = []
 
+		self.starting_city = -1
+		
 	def create_city(self, name):
 		self.cities.append({"name":name, "visited":False, "tentative":-1, "via": -1})
 
@@ -40,6 +42,7 @@ class Network:
 
 	def set_starting_city(self, city):
 		self.cities[self.get_index(city)]["tentative"] = 0
+		self.starting_city = city
 
 	def set_options_for_city(self, city):
 		self.road_order = []
@@ -48,41 +51,46 @@ class Network:
 				self.road_order.append(self.roads[i])
 		self.road_order.sort(key=lambda road: road["distance"])	
 
-	def check(self, city):
-		if self.cities[self.get_index(city)]["visited"] == True:
+	def check_till(self, city, destination):
+		if self.cities[self.get_index(city)]["visited"] == True or city == destination:
 			return
 
 		self.set_options_for_city(city)
-#		print(city)
+		current = self.cities[self.get_index(city)]["tentative"]
 		for road in self.road_order:
-			current = self.cities[self.get_index(city)]["tentative"]
 			for dest in road["connects"]:		# Get the destination city (ie. the one on the road that isnt the current one)
 				if dest != city:
 					destination_city = dest
 
-#			print(road)
-
 			dest_index = self.get_index(destination_city)
-#			print(dest_index)
 			tentative = self.cities[dest_index]["tentative"]
-			
+		
 			if tentative == -1 or current + road["distance"] < tentative:
 				self.cities[dest_index]["tentative"] = current + road["distance"]
 				self.cities[dest_index]["via"] = city
 		
 		self.cities[self.get_index(city)]["visited"] = True
 	
-#		if city == 1:
-#			print(self.road_order)
-#			exit()
 
 		check_order = self.road_order
 		for unvis in check_order:
 			for dest in unvis["connects"]:
 				if dest != city:
 					new = dest
-			self.check(new)
+			if self.get_index(destination) != None:
+				if self.cities[self.get_index(destination)]["tentative"] != -1 and self.cities[self.get_index(destination)]["tentative"] < self.cities[self.get_index(city)]["tentative"] + unvis["distance"]:
+					continue
+			self.check_till(new, destination)
 
+	def create_map(self):
+		self.check_till(self.starting_city, -1)
+
+	def get_route(self, dest):
+		self.check_till(self.starting_city, dest)
+		order = [dest]
+		while order[0] != -1:
+			order.insert(0, self.cities[self.get_index(order[0])]["via"])
+		return {"route":order[1:], "distance":self.cities[self.get_index(dest)]["tentative"]}
 
 	def __repr__(self):
 		roads = ""
@@ -91,9 +99,8 @@ class Network:
 			roads = "%s\n%s" % (roads, road)
 		for city in self.cities:
 			cities = "%s\n%s" % (cities, city)
+#		return "Network:\ncities:%s" %(cities)	
 		return "Network:\nroads: %s\n\ncities: %s" % (roads, cities)
-
-#TODO add check to end
 
 n = Network()
 for i in range(0, 14):
@@ -131,12 +138,8 @@ roads = [[0,1,20],
 		 [11,12,63]]
 
 n.create_roads(roads)
-
-
-# Starting city is 0
 n.set_starting_city(2)
-n.check(2)
-print(n)
 
+print(n.get_route(13))
 
 
